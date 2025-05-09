@@ -7,7 +7,7 @@ import * as z from "zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { registerUserAction } from "@/actions/register";
 
 const schema = z.object({
@@ -46,8 +46,14 @@ const RegisterForm = () => {
       });      
       const result = await registerUserAction(formData);
       console.log(result, "result");
+      if (result.status === 200) {
+        
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       console.log(error);      
+      toast.error(`${error}`);
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +95,7 @@ const RegisterForm = () => {
       <Button type="submit" disabled={isLoading} className="mt-3 w-full hover:bg-gray-800 text-white font-semibold py-3 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-101 focus:outline-none focus:ring-2 focus:ring-blue-500">
         Register
       </Button>
+      <Toaster richColors />
     </form>
   );
 };
