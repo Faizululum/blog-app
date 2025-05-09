@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { registerUserAction } from "@/actions/register";
 
 const schema = z.object({
   name: z
@@ -24,13 +25,36 @@ const RegisterForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = useForm({
     resolver: zodResolver(schema),
   });
 
+  interface RegisterUser {
+    name: string;
+    email: string;
+    password: string;
+  }
+
+  const onSubmit = async (data: RegisterUser) => {
+    setIsLoading(true);
+    try {
+      console.log(data);
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key as keyof RegisterUser]);
+      });      
+      const result = await registerUserAction(formData);
+      console.log(result, "result");
+    } catch (error) {
+      console.log(error);      
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
-    <form>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-3">
         <div className="relative">
           <User className="absolute left-3 mt-2 h-5 w-5 text-gray-400" />
