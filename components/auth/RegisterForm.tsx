@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast, Toaster } from "sonner";
 import { registerUserAction } from "@/actions/register";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   name: z
@@ -22,6 +23,7 @@ const schema = z.object({
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -46,8 +48,9 @@ const RegisterForm = () => {
       });      
       const result = await registerUserAction(formData);
       console.log(result, "result");
-      if (result.status === 200) {
-        
+      if (result.status === 200 || result.status === 201) {
+        toast.success("Registered successfully");
+        router.push("/login");
       } else {
         throw new Error(result.error);
       }
