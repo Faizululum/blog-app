@@ -18,9 +18,9 @@ const RegisterPage = () => {
               Already have an account?
               <Link
                 className="font-medium ml-1 text-blue-600 hover:text-blue-500"
-                href="/register"
+                href="/login"
               >
-                Register
+                Login
               </Link>
             </p>
           </div>
