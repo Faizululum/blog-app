@@ -78,6 +78,7 @@ export async function loginUserAction(formData: FormData) {
     const userToken = await new SignJWT({
       userId: user._id.toString(),
       email: user.email,
+      userName: user.name,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
