@@ -1,7 +1,15 @@
 import LoginForm from "@/components/auth/LoginForm";
+import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-const LoginPage = () => {
+const LoginPage = async () => {
+  const token = (await cookies()).get("token")?.value;
+
+  if (token) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-gradient-to-br from-gray-100 to-gray-200">
       <div className="w-full md:w-1/2 flex items-center justify-center p-8 lg:p-12">

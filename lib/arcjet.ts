@@ -42,6 +42,24 @@ export const loginRules = arcjet({
             max: 5,
         })
     ]
-})
+});
+
+export const ajMiddleware = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1m",
+      max: 10,
+    }),
+    shield({
+      mode: "LIVE",
+    }),
+  ]
+});
 
 export default aj;
