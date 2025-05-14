@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CommonLayout from "@/components/layout/Layout";
+import "@uploadthing/react/styles.css"; // fallback styling UploadThing
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
