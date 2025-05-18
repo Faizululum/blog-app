@@ -10,6 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { UploadButton } from "../general/UploadThingReexported";
 import { PlusCircle } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+import "./quill-custom.css";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const blogPostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -17,6 +21,8 @@ const blogPostSchema = z.object({
   category: z.string().min(1, { message: "Category is required" }),
   coverImage: z.string().min(1, { message: "Image is required" }),
 });
+
+const ReactQuill = dynamic(()=> import("react-quill-new"), { ssr: false });
 
 interface CreateBlogProps {
   userName: string;
@@ -38,6 +44,8 @@ const CreateBlog = ({
 }: Readonly<{
   user: CreateBlogProps;
 }>) => {
+  const [quillLoaded, setQuillLoaded] = useState(false);
+  const quillRef = useRef(null);
   const {
     control,
     handleSubmit,
@@ -53,6 +61,25 @@ const CreateBlog = ({
     },
     resolver: zodResolver(blogPostSchema),
   });
+
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ color: [] }, { background: [] }],
+        ["blockquote", "code-block"],
+        ["link"],
+        ["clean"],
+      ],
+    }),
+    []
+  );
+
+  useEffect(() => {
+    setQuillLoaded(true);
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
@@ -102,7 +129,7 @@ const CreateBlog = ({
               </Select>
             )}
           />
-          <div className="flex items-center">
+          <div className="flex items-center mb-6">
             <UploadButton
               endpoint="imageUploader"
               onClientUploadComplete={(res) => {
@@ -116,7 +143,7 @@ const CreateBlog = ({
               }}
               content={{ 
                 button : (
-                  <div className="flex gap-2 items-center">
+                  <div className="px-2 flex gap-2 items-center">
                     <PlusCircle className="w-4 h-4 text-white" />
                     <span className="text-[12px]">Add Cover Image</span>
                   </div>
@@ -125,12 +152,35 @@ const CreateBlog = ({
                appearance={{ 
                   allowedContent: {
                     display: "none",
-                  }
+                  },
+                  button: "ut-ready:bg-black-500 ut-uploading:cursor-not-allowed rounded-r-none bg-black-900 bg-none after:bg-black-400",
+                  container: "mt-4 w-max flex-row rounded-md border-cyan-300 bg-slate-800"
                 }}
-                className="mt-4 ut:button:bg-black ut-button:ut-readying:bg-black"
             />
             <Toaster richColors />
           </div>
+          {
+            quillLoaded && 
+            <Controller 
+              name="content"
+              control={control}
+              render={({ field }) => {
+                const { ref, ...fieldProps } = field;
+
+                return (
+                  <ReactQuill 
+                    ref={quillRef}
+                    theme="snow"
+                    modules={modules}
+                    {...fieldProps}
+                    onChange={(content) => field.onChange(content)}
+                    placeholder="Write your blog here"
+                    className="quill-editor"
+                  />
+                )
+              }}
+            />
+          }
         </form>
       </main>
     </div>
