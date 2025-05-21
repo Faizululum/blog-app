@@ -62,4 +62,18 @@ export const ajMiddleware = arcjet({
   ]
 });
 
+export const blogPostRules = arcjet({
+    key: process.env.ARCJET_KEY!,
+    characteristics: ["ip.src"],
+    rules: [
+        detectBot({
+            mode: "LIVE",
+            allow: [],
+        }),
+        shield({
+            mode: "LIVE",
+        }),
+    ]
+});
+
 export default aj;

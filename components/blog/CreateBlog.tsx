@@ -14,6 +14,7 @@ import dynamic from "next/dynamic";
 import "react-quill-new/dist/quill.snow.css";
 import "./quill-custom.css";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const blogPostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -37,7 +38,20 @@ const BLOG_CATEGORIES = [
     {key: "entertainment", value: "Entertainment"},
     {key: "programming", value: "Programming"},
     {key: "webDevelopment", value: "Web Development"},
-]
+];
+
+const isSuspiciousContent = (data: z.infer<typeof blogPostSchema>) => {
+  const suspiciousPatterns = [
+    /<script>/i,
+    /javascript/i,
+    /onload=/i,
+    /onclick=/i,
+    /'.*OR.*'/i,
+    /UNION SELECT/i,
+  ];
+
+  return suspiciousPatterns.some(pattern => pattern.test(data.content));
+}
 
 const CreateBlog = ({
   user,
@@ -45,7 +59,9 @@ const CreateBlog = ({
   user: CreateBlogProps;
 }>) => {
   const [quillLoaded, setQuillLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const quillRef = useRef(null);
+  const router = useRouter();
   const {
     control,
     handleSubmit,
@@ -62,6 +78,11 @@ const CreateBlog = ({
     resolver: zodResolver(blogPostSchema),
   });
 
+  const title = watch("title");
+  const category = watch("category");
+  const content = watch("content");
+  const coverImage = watch("coverImage");
+
   const modules = useMemo(
     () => ({
       toolbar: [
@@ -77,9 +98,40 @@ const CreateBlog = ({
     []
   );
 
+  const onBlogSubmit = async (data: z.infer<typeof blogPostSchema>) => {
+    setIsLoading(true);
+    try {
+      const isSuspiciousInput = isSuspiciousContent(data);
+
+      const result = await fetch("/api/create-blog-post", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-arcjet-suspicious": isSuspiciousInput.toString(),
+        },
+        body: JSON.stringify(data),
+      }).then(res => res.json());
+
+      if (result.success) {
+        toast.success("Blog post created successfully");
+        router.push("/");
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error("An error occured");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
     setQuillLoaded(true);
-  }, [])
+  }, []);
+
+  const isBtnDisabled = () => {
+    return title === "" || content === "" || category === "" || coverImage === "";    
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
@@ -92,7 +144,7 @@ const CreateBlog = ({
             <p className="font-semibold">{user.userName}</p>
           </div>
         </div>
-        <Button>Publish</Button>
+        <Button disabled={isBtnDisabled() || isLoading} onClick={handleSubmit(onBlogSubmit)}>Publish</Button>
       </header>
       <main>
         <form>
@@ -165,14 +217,13 @@ const CreateBlog = ({
               name="content"
               control={control}
               render={({ field }) => {
-                const { ref, ...fieldProps } = field;
 
                 return (
                   <ReactQuill 
                     ref={quillRef}
                     theme="snow"
                     modules={modules}
-                    {...fieldProps}
+                    {...field}
                     onChange={(content) => field.onChange(content)}
                     placeholder="Write your blog here"
                     className="quill-editor"
