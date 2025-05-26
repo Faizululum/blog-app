@@ -27,7 +27,7 @@
 }
 
 .category {
-    color: chartreuse;
+    color: #57c4ff;
     font-weight: 500;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .link {
-    border-bottom: 1px solid chartreuse;
+    border-bottom: 1px solid #57c4ff;
     width: max-content;
     padding: 2px 0px;
 }
