@@ -7,7 +7,8 @@
   width: 100px;
   border: none;
   padding: 16px;
-  background-color: crimson;
+  border-radius: 5px;
+  background-color: #57c4ff;
   color: white;
   cursor: pointer;
 }
