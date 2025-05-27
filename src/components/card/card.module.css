@@ -42,3 +42,13 @@
     width: max-content;
     padding: 2px 0px;
 }
+
+@media screen and (max-width: 640px) {
+    .imageContainer {
+        display: none;
+    }
+
+    .textContainer {
+        gap: 12px;
+    }
+}
